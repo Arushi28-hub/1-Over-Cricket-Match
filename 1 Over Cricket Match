@@ -1,0 +1,98 @@
+import random
+
+def toss(user_choice):
+    outcomes = ["Heads", "Tails"]
+    toss_result = random.choice(outcomes)
+    return toss_result == user_choice, toss_result
+
+def decide_play(team_won_toss):
+    decision = input(f"{team_won_toss} won the toss! What do you want to do? Bat or Bowl? ").strip().capitalize()
+    return decision
+
+def play_ball():
+    outcome = random.choices(
+        ['0', '1', '2', '3', '4', '6', 'W'], 
+        weights=[20, 30, 10, 5, 30, 20, 5], 
+        k=1
+    )[0]
+    
+    if outcome == 'W':
+        print("Wicket! A player is out.")
+        return 0  # No runs scored on a wicket
+    else:
+        runs = int(outcome)
+        print(f"Runs scored: {runs}")
+        return runs
+
+def play_over(team_name):
+    balls = 0
+    total_runs = 0
+    while balls < 6:
+        runs = play_ball()
+        total_runs += runs
+        balls += 1
+        print(f"Total runs for {team_name}: {total_runs} after {balls} balls\n")
+    return total_runs
+
+def play_match(team1, team2):
+    print(f"\n{team1} is batting:")
+    team1_runs = play_over(team1)
+    print(f"End of over for {team1}. Total runs: {team1_runs}\n")
+    
+    print(f"{team2} is batting:")
+    team2_runs = play_over(team2)
+    print(f"End of over for {team2}. Total runs: {team2_runs}\n")
+
+    # Show final scores
+    print("Final Scores:")
+    print(f"{team1}: {team1_runs} runs")
+    print(f"{team2}: {team2_runs} runs")
+    
+    if team1_runs > team2_runs:
+        winner = f"{team1} wins!"
+    elif team1_runs < team2_runs:
+        winner = f"{team2} wins!"
+    else:
+        winner = "It's a tie!"
+
+    print(winner)
+
+# Input for the two teams
+team1 = input("Enter the name of Team 1: ")
+team2 = input("Enter the name of Team 2: ")
+
+# User inputs their choice for the toss
+user_choice = input(f"{team1}, choose Heads or Tails for the toss: ").strip().capitalize()
+
+# Simulate the toss
+user_won_toss, toss_result = toss(user_choice)
+print(f"Toss Result: {toss_result}")
+
+if user_won_toss:
+    decision = decide_play(team1)
+    print(f"{team1} won the toss and decided to {decision} first.")
+else:
+    decision = decide_play(team2)
+    print(f"{team2} won the toss and decided to {decision} first.")
+
+# Input playing XI for both teams
+print("Now I would like to call the captain of the team to tell the playing XI:")
+print("Firstly", team1)
+
+team_scores = [0, 0]  # Initialize scores for both teams
+team1_11 = list(map(str, input(f"Playing 11 for {team1}: ").split(" ")))
+team2_11 = list(map(str, input(f"Playing 11 for {team2}: ").split(" ")))
+
+print(f"Playing 11 for {team1}:")
+print()
+for player in team1_11:
+    print(player)
+print()
+
+print(f"Playing 11 for {team2}:")
+print()
+for player in team2_11:
+    print(player)
+
+# Start the match
+play_match(team1,team2)
