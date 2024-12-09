@@ -10,48 +10,80 @@ def decide_play(team_won_toss):
     return decision
 
 def play_ball():
+    # Add no-ball and wide options
     outcome = random.choices(
-        ['0', '1', '2', '3', '4', '6', 'W'], 
-        weights=[20, 30, 10, 5, 30, 20, 5], 
+        ['0', '1', '2', '3', '4', '6', 'W', 'NB', 'WD'],
+        weights=[20, 30, 10, 5, 30, 20, 5, 5, 5],
         k=1
     )[0]
-    
+
     if outcome == 'W':
         print("Wicket! A player is out.")
-        return 0  # No runs scored on a wicket
+        return 0, False  # No runs scored on a wicket, player out
+    elif outcome == 'NB':
+        print("No Ball! Awarded 1 extra run.")
+        return 1, True  # Award 1 extra run for no ball, continue the over
+    elif outcome == 'WD':
+        print("Wide Ball! Awarded 1 extra run.")
+        return 1, True  # Award 1 extra run for wide, continue the over
     else:
         runs = int(outcome)
         print(f"Runs scored: {runs}")
-        return runs
+        return runs, False  # Normal run
 
-def play_over(team_name):
+def play_over(team_name, opponent_runs=None):
     balls = 0
     total_runs = 0
+    wickets = 0
+
     while balls < 6:
-        runs = play_ball()
+        runs, extra_ball = play_ball()
         total_runs += runs
-        balls += 1
+
+        # Increment wickets only if a wicket occurs
+        if runs == 0 and extra_ball is False:  # Count as a dot ball
+            print("Dot ball, no runs scored.")
+        elif runs == 0 and extra_ball:  # If it's a no-ball or wide, don't count it as a dot
+            print("Extra delivery (No ball or Wide), no wicket counted.")
+        elif runs == 0 and extra_ball is False:
+            wickets += 1  # Increment wickets only if it's a legitimate dot ball
+
+        # Count only legal deliveries
+        if not extra_ball:
+            balls += 1
+
         print(f"Total runs for {team_name}: {total_runs} after {balls} balls\n")
-    return total_runs
+
+        # Check for 2 wickets
+        if wickets >= 2:
+            print(f"{team_name} lost 2 wickets. Innings ended.")
+            break
+
+        # Check if Team 2 has surpassed Team 1's score
+        if opponent_runs is not None and total_runs > opponent_runs:
+            print(f"{team_name} has scored more than {team1}. Innings ended.")
+            break
+
+    return total_runs, wickets
 
 def play_match(team1, team2):
     print(f"\n{team1} is batting:")
-    team1_runs = play_over(team1)
-    print(f"End of over for {team1}. Total runs: {team1_runs}\n")
-    
+    team1_runs, team1_wickets = play_over(team1)
+    print(f"End of innings for {1}. Total runs: {team1_runs}\n")
+
     print(f"{team2} is batting:")
-    team2_runs = play_over(team2)
-    print(f"End of over for {team2}. Total runs: {team2_runs}\n")
+    team2_runs, team2_wickets = play_over(team2, team1_runs)
+    print(f"End of innings for {team2}. Total runs: {team2_runs}\n")
 
     # Show final scores
     print("Final Scores:")
     print(f"{team1}: {team1_runs} runs")
     print(f"{team2}: {team2_runs} runs")
-    
-    if team1_runs > team2_runs:
-        winner = f"{team1} wins!"
-    elif team1_runs < team2_runs:
+
+    if team2_runs > team1_runs:
         winner = f"{team2} wins!"
+    elif team1_runs > team2_runs:
+        winner = f"{team1} wins!"
     else:
         winner = "It's a tie!"
 
@@ -79,18 +111,14 @@ else:
 print("Now I would like to call the captain of the team to tell the playing XI:")
 print("Firstly", team1)
 
-team_scores = [0, 0]  # Initialize scores for both teams
 team1_11 = list(map(str, input(f"Playing 11 for {team1}: ").split(" ")))
 team2_11 = list(map(str, input(f"Playing 11 for {team2}: ").split(" ")))
 
 print(f"Playing 11 for {team1}:")
-print()
 for player in team1_11:
     print(player)
-print()
 
-print(f"Playing 11 for {team2}:")
-print()
+print(f"\nPlaying 11 for {team2}:")
 for player in team2_11:
     print(player)
 
